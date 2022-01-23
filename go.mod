@@ -3,6 +3,7 @@ module github.com/MangioneAndrea/gonsole
 go 1.18
 
 require (
+	github.com/MangioneAndrea/GoUtils v1.0.4 // indirect
 	github.com/gdamore/encoding v1.0.0 // indirect
 	github.com/gdamore/tcell v1.4.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.0.3 // indirect

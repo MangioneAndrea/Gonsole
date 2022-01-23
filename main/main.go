@@ -1,9 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"github.com/MangioneAndrea/gonsole"
 )
 
 func main() {
-	gonsole.Cli().Confirm("Confirm").Input("Enter name")
+	var res []string
+	gonsole.Cli().
+		SelectMany([]string{"hey", "hi", "", "hola"}, &res) /*.
+	Confirm("Confirm").
+	Input("Enter name")*/
+	fmt.Println(res)
 }

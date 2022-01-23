@@ -93,33 +93,45 @@ func (s *screen) Draw() *screen {
 	s.s.Show()
 	return s
 }
+func (s *screen) GoTo(x, y int) *screen {
+	s.x = x
+	s.y = y
+	return s
+}
 
-func (s *screen) Up() *screen {
-	if s.y == 0 {
-		return s
-	}
-	s.y--
+func (s *screen) Up(amount int) *screen {
+	s.y = max(0, s.y-amount)
 	s.x = min(s.x, len(s.lines[s.y]))
 	return s
 }
-func (s *screen) Down() *screen {
-	if s.y+1 < len(s.lines) {
-		s.y++
-	}
+func (s *screen) Down(amount int) *screen {
+	s.y = min(len(s.lines)-1, s.y+amount)
 	s.x = min(s.x, len(s.lines[s.y]))
 	return s
 }
-func (s *screen) Left() *screen {
-	if s.x == 0 {
-		return s
-	}
-	s.x--
+func (s *screen) Left(amount int) *screen {
+	s.x = max(0, s.x-amount)
 	return s
 }
 
 func (s *screen) Right(amount int) *screen {
-	s.x = min(len(s.lines[s.y]), amount+s.x)
+	if len(s.lines[s.y]) != 0 {
+		s.x = min(len(s.lines[s.y])-1, amount+s.x)
+	}
 	return s
+}
+
+func (s *screen) Top() *screen {
+	return s.Up(s.y)
+}
+func (s *screen) Bottom() *screen {
+	return s.Down(len(s.lines) - s.y)
+}
+func (s *screen) Start() *screen {
+	return s.Left(s.x)
+}
+func (s *screen) End() *screen {
+	return s.Right(len(s.lines[s.y]) - s.y)
 }
 
 func (s *screen) Newline() *screen {
@@ -145,7 +157,7 @@ func (s *screen) Write(str string) *screen {
 func (s *screen) DeleteOne() *screen {
 	p := s.lines[s.y]
 	s.lines[s.y] = p[:s.x-1] + p[s.x:]
-	s.Left()
+	s.Left(1)
 	return s
 }
 
@@ -184,7 +196,7 @@ func (s *screen) pollText() string {
 				s.Right(1).Draw()
 			case tcell.KeyLeft:
 				if s.x > minx {
-					s.Left().Draw()
+					s.Left(1).Draw()
 				}
 			case tcell.KeyRune:
 				s.Write(string(ev.Rune())).Draw()
@@ -200,6 +212,67 @@ func (s *screen) pollText() string {
 				return s.lines[s.y][minx:]
 			}
 
+		}
+	}
+}
+
+func (s *screen) pollVerticalSelect() int {
+	minY := s.y
+	for {
+		ev := s.s.PollEvent()
+		switch ev := ev.(type) {
+		case *tcell.EventKey:
+			switch ev.Key() {
+			case tcell.KeyRune:
+				switch ev.Rune() {
+				}
+			case tcell.KeyUp:
+				if s.y > minY {
+					s.Up(1).Draw()
+				}
+			case tcell.KeyDown:
+				if s.y < len(s.lines)-1 {
+					s.Down(1).Draw()
+				}
+			case tcell.KeyEnter:
+				s.Bottom()
+				return s.y - minY
+			case tcell.KeyEscape, tcell.KeyCtrlC:
+				return -1
+			}
+		}
+	}
+}
+
+func (s *screen) pollVerticalManySelect(onUpdate func(bool, int)) []bool {
+	minY := s.y
+	selection := make([]bool, len(s.lines)-minY)
+	for {
+		ev := s.s.PollEvent()
+		switch ev := ev.(type) {
+		case *tcell.EventKey:
+			switch ev.Key() {
+			case tcell.KeyRune:
+				switch ev.Rune() {
+				case ' ':
+					selection[s.y-minY] = !selection[s.y-minY]
+					onUpdate(selection[s.y-minY], s.y-minY)
+				}
+			case tcell.KeyUp:
+				if s.y > minY {
+					s.Up(1).Draw()
+				}
+			case tcell.KeyDown:
+				if s.y < len(s.lines)-1 {
+					s.Down(1).Draw()
+				}
+			case tcell.KeyEnter:
+				s.Bottom().Draw()
+				return selection
+
+			case tcell.KeyEscape, tcell.KeyCtrlC:
+				return selection
+			}
 		}
 	}
 }
