@@ -236,8 +236,8 @@ func (s *screen) pollText() string {
 
 func (s *screen) pollVerticalSelect(count int) int {
 	minY := len(s.lines) - count
-	s.ColorLine(tcell.ColorAzure)
 	s.y = minY
+	s.ColorLine(SelectedLineColor)
 	s.Draw()
 	for {
 		ev := s.s.PollEvent()
@@ -249,11 +249,11 @@ func (s *screen) pollVerticalSelect(count int) int {
 				}
 			case tcell.KeyUp:
 				if s.y > minY {
-					s.ClearColor().Up(1).ColorLine(tcell.ColorAzure).Draw()
+					s.ClearColor().Up(1).ColorLine(SelectedLineColor).Draw()
 				}
 			case tcell.KeyDown:
 				if s.y < len(s.lines)-1 {
-					s.ClearColor().Down(1).ColorLine(tcell.ColorAzure).Draw()
+					s.ClearColor().Down(1).ColorLine(SelectedLineColor).Draw()
 				}
 			case tcell.KeyEnter:
 				s.Bottom().Draw()
@@ -269,6 +269,7 @@ func (s *screen) pollVerticalManySelect(count int, onUpdate func(bool, int)) []b
 	minY := len(s.lines) - count
 	selection := make([]bool, len(s.lines)-minY)
 	s.y = minY
+	s.ColorLine(SelectedLineColor)
 	s.Draw()
 	for {
 		ev := s.s.PollEvent()
@@ -283,11 +284,11 @@ func (s *screen) pollVerticalManySelect(count int, onUpdate func(bool, int)) []b
 				}
 			case tcell.KeyUp:
 				if s.y > minY {
-					s.Up(1).Draw()
+					s.ClearColor().Up(1).ColorLine(SelectedLineColor).Draw()
 				}
 			case tcell.KeyDown:
 				if s.y < len(s.lines)-1 {
-					s.Down(1).Draw()
+					s.ClearColor().Down(1).ColorLine(SelectedLineColor).Draw()
 				}
 			case tcell.KeyEnter:
 				s.Bottom().Draw()

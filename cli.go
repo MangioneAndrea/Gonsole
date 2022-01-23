@@ -27,6 +27,7 @@ func Cli() *cli {
 
 var QuestionColor tcell.Color = tcell.ColorViolet
 var ActiveQuestionColor tcell.Color = tcell.ColorForestGreen
+var SelectedLineColor tcell.Color = tcell.ColorCadetBlue
 
 func (c *cli) Confirm(message string, confirmed *bool) *cli {
 	if c.interrupted {
