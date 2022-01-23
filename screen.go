@@ -26,11 +26,11 @@ func max[T numbers](a, b T) T {
 
 type screen struct {
 	lines  []string
+	colors map[int]tcell.Color
 	x      int
 	y      int
 	cursor bool
 	s      tcell.Screen
-	style  tcell.Style
 }
 
 func NewScreen() *screen {
@@ -43,13 +43,12 @@ func NewScreen() *screen {
 	}
 
 	scr := &screen{
-		lines: []string{""},
-		x:     0,
-		y:     0,
-		style: tcell.StyleDefault,
-		s:     s,
+		lines:  []string{""},
+		colors: make(map[int]tcell.Color),
+		x:      0,
+		y:      0,
+		s:      s,
 	}
-	scr.s.SetStyle(scr.style)
 	scr.s.Clear()
 	scr.s.Show()
 	return scr
@@ -82,9 +81,12 @@ func (s *screen) Draw() *screen {
 	s.s.Clear()
 
 	for y, line := range s.lines {
-		drawText(s.s, 0, y, len(line), y, s.style, line)
+		style := tcell.StyleDefault
+		if val, ok := s.colors[y]; ok {
+			style = style.Foreground(val)
+		}
+		drawText(s.s, 0, y, len(line), y, style, line)
 	}
-	fmt.Println(s.lines)
 	if s.cursor {
 		s.s.ShowCursor(s.x, s.y)
 	} else {
@@ -116,7 +118,7 @@ func (s *screen) Left(amount int) *screen {
 
 func (s *screen) Right(amount int) *screen {
 	if len(s.lines[s.y]) != 0 {
-		s.x = min(len(s.lines[s.y])-1, amount+s.x)
+		s.x = min(len(s.lines[s.y]), amount+s.x)
 	}
 	return s
 }
@@ -131,7 +133,17 @@ func (s *screen) Start() *screen {
 	return s.Left(s.x)
 }
 func (s *screen) End() *screen {
-	return s.Right(len(s.lines[s.y]) - s.y)
+	return s.Right(len(s.lines[s.y]) - s.y + 1)
+}
+
+func (s *screen) ClearColor() *screen {
+	delete(s.colors, s.y)
+	return s
+}
+
+func (s *screen) ColorLine(color tcell.Color) *screen {
+	s.colors[s.y] = color
+	return s
 }
 
 func (s *screen) Newline() *screen {
@@ -152,6 +164,12 @@ func (s *screen) WriteF(format string, args ...interface{}) *screen {
 }
 func (s *screen) Write(str string) *screen {
 	return s.WriteF(str)
+}
+
+func (s *screen) DeleteLastLines(amount int) *screen {
+	s.lines = s.lines[:len(s.lines)-amount]
+	s.Down(0)
+	return s
 }
 
 func (s *screen) DeleteOne() *screen {
@@ -216,8 +234,11 @@ func (s *screen) pollText() string {
 	}
 }
 
-func (s *screen) pollVerticalSelect() int {
-	minY := s.y
+func (s *screen) pollVerticalSelect(count int) int {
+	minY := len(s.lines) - count
+	s.ColorLine(tcell.ColorAzure)
+	s.y = minY
+	s.Draw()
 	for {
 		ev := s.s.PollEvent()
 		switch ev := ev.(type) {
@@ -228,14 +249,14 @@ func (s *screen) pollVerticalSelect() int {
 				}
 			case tcell.KeyUp:
 				if s.y > minY {
-					s.Up(1).Draw()
+					s.ClearColor().Up(1).ColorLine(tcell.ColorAzure).Draw()
 				}
 			case tcell.KeyDown:
 				if s.y < len(s.lines)-1 {
-					s.Down(1).Draw()
+					s.ClearColor().Down(1).ColorLine(tcell.ColorAzure).Draw()
 				}
 			case tcell.KeyEnter:
-				s.Bottom()
+				s.Bottom().Draw()
 				return s.y - minY
 			case tcell.KeyEscape, tcell.KeyCtrlC:
 				return -1
@@ -244,9 +265,11 @@ func (s *screen) pollVerticalSelect() int {
 	}
 }
 
-func (s *screen) pollVerticalManySelect(onUpdate func(bool, int)) []bool {
-	minY := s.y
+func (s *screen) pollVerticalManySelect(count int, onUpdate func(bool, int)) []bool {
+	minY := len(s.lines) - count
 	selection := make([]bool, len(s.lines)-minY)
+	s.y = minY
+	s.Draw()
 	for {
 		ev := s.s.PollEvent()
 		switch ev := ev.(type) {

@@ -1,97 +1,86 @@
 package gonsole
 
 import (
-	"github.com/MangioneAndrea/GoUtils/structures"
-	term "github.com/nsf/termbox-go"
+	"fmt"
+	"io"
 	"os"
 )
 
-var out = os.Stdout
-var in = os.Stdin
+var out io.Writer = os.Stdout
+var in io.Writer = os.Stdin
 
-type cli struct {
-	interrupted bool
-	screen      *screen
-}
+type Color string
 
-func Cli() *cli {
-	c := &cli{
-		interrupted: false,
-		screen:      NewScreen(),
-	}
-	term.Init()
-	return c
-}
+var (
+	Default = Color("")
+	Black   = Color("\033[1;30m%s\033[0m")
+	Red     = Color("\033[1;31m%s\033[0m")
+	Green   = Color("\033[1;32m%s\033[0m")
+	Yellow  = Color("\033[1;33m%s\033[0m")
+	Purple  = Color("\033[1;34m%s\033[0m")
+	Magenta = Color("\033[1;35m%s\033[0m")
+	Teal    = Color("\033[1;36m%s\033[0m")
+	White   = Color("\033[1;37m%s\033[0m")
+)
 
-func (c *cli) Confirm(message string, confirmed *bool) *cli {
-	if c.interrupted {
-		return c
-	}
-	c.screen.WriteF("- %s? (y / n) : \n", message).ShowCursor(true).Draw()
-	*confirmed = c.screen.pollYN()
-	if *confirmed {
-		c.screen.Write("y")
-	} else {
-		c.screen.Write("n")
-	}
-	c.screen.ShowCursor(false).Newline().Draw()
-	return c
-}
-
-func (c *cli) Input(message string, input *string) *cli {
-	if c.interrupted {
-		return c
-	}
-	c.screen.WriteF("- %s: ", message).ShowCursor(true).Draw()
-	*input = c.screen.pollText()
-	c.screen.Newline().Draw()
-	return c
-}
-
-func (c *cli) SelectOne(messages []string, selection *string) *cli {
-	if c.interrupted {
-		return c
-	}
-
-	for i, message := range messages {
-		c.screen.WriteF("- %s", message)
-		if i < len(messages)-1 {
-			c.screen.Newline()
+// Color Format text with custom color
+func setColor(colorString Color) func(...interface{}) string {
+	sprint := func(args ...interface{}) string {
+		if colorString == Default {
+			return fmt.Sprint(args...)
 		}
+		return fmt.Sprintf(string(colorString),
+			fmt.Sprint(args...))
 	}
-	c.screen.Top().Start().Draw()
-	idx := c.screen.ShowCursor(true).Draw().pollVerticalSelect()
-
-	if idx != -1 {
-		*selection = messages[idx]
-	}
-
-	return c
+	return sprint
 }
 
-func (c *cli) SelectMany(messages []string, selection *[]string) *cli {
-	if c.interrupted {
-		return c
+type ShowIf func(elem interface{}) bool
+
+var ShowAlways ShowIf = func(elem interface{}) bool { return true }
+
+var ShowIfNotNil ShowIf = func(elem interface{}) bool { return elem != nil }
+
+func resolveProps(props []interface{}) (interface{}, ShowIf) {
+	switch len(props) {
+	case 1:
+		return props[0], ShowAlways
+	case 2:
+		return props[0], props[1].(ShowIf)
 	}
+	return nil, ShowAlways
+}
 
-	for i, message := range messages {
-		c.screen.WriteF("[ ] %s", message)
-		if i < len(messages)-1 {
-			c.screen.Newline()
+func Print(a interface{}, desc interface{}, showIf ShowIf, color Color) {
+	if showIf(a) {
+		if desc != nil {
+			fmt.Fprint(out, setColor(color)(desc), setColor(color)(": "))
 		}
+		fmt.Printf("set'%s'", setColor(color)(a))
+		fmt.Fprintln(out, setColor(color)(a))
 	}
-	c.screen.Top().Start().Right(1).Draw()
-	idxs := c.screen.ShowCursor(true).Draw().pollVerticalManySelect(func(selected bool, i int) {
-		sign := " "
-		if selected {
-			sign = "x"
-		}
-		c.screen.Start().Right(2).DeleteOne().Write(sign).Left(1).Draw()
-	})
+}
 
-	*selection = structures.Filter(messages, func(_ string, i int) bool {
-		return idxs[i]
-	})
+// Log Print a text
+func Log(a interface{}, props ...interface{}) {
+	desc, showIf := resolveProps(props)
+	Print(a, desc, showIf, Default)
+}
 
-	return c
+// Success Print a text green
+func Success(a interface{}, props ...interface{}) {
+	desc, showIf := resolveProps(props)
+	Print(a, desc, showIf, Green)
+}
+
+// Error Print a text red
+func Error(a interface{}, props ...interface{}) {
+	desc, showIf := resolveProps(props)
+	Print(a, desc, showIf, Red)
+}
+
+// Warn Print a text yellow
+func Warn(a interface{}, props ...interface{}) {
+	desc, showIf := resolveProps(props)
+	Print(a, desc, showIf, Yellow)
 }
