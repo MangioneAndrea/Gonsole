@@ -32,7 +32,7 @@ func (c *cli) Confirm(message string, confirmed *bool) *cli {
 	if c.interrupted {
 		return c
 	}
-	c.screen.ColorLine(ActiveQuestionColor).WriteF("- %s? (y / n) : \n", message).ShowCursor(true).Draw()
+	c.screen.ColorLine(ActiveQuestionColor).WriteF("%s? (y / n) : \n", message).ShowCursor(true).Draw()
 	*confirmed = c.screen.pollYN()
 	if *confirmed {
 		c.screen.Write("y")
@@ -47,7 +47,7 @@ func (c *cli) Input(message string, input *string) *cli {
 	if c.interrupted {
 		return c
 	}
-	c.screen.ColorLine(ActiveQuestionColor).WriteF("- %s: ", message).ShowCursor(true).Draw()
+	c.screen.ColorLine(ActiveQuestionColor).WriteF("%s: ", message).ShowCursor(true).Draw()
 	*input = c.screen.pollText()
 	c.screen.ColorLine(QuestionColor).Newline().Draw()
 	return c

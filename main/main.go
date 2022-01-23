@@ -5,11 +5,14 @@ import (
 )
 
 func main() {
-	var multi []string
+	var nat string
+	var color []string
 	var conf bool
 	var name string
+
 	gonsole.Cli().
-		SelectMany("Select greeting", []string{"hey", "hi", "", "hola"}, &multi).
+		SelectOne("Select nationality", []string{"en", "de", "it"}, &nat).
+		SelectMany("Select colors", []string{"red", "blue", "green", "violet"}, &color).
 		Confirm("Confirm", &conf).
 		Input("Enter name", &name)
 }
