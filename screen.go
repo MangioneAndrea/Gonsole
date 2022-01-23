@@ -87,6 +87,8 @@ func (s *screen) Draw() *screen {
 	fmt.Println(s.lines)
 	if s.cursor {
 		s.s.ShowCursor(s.x, s.y)
+	} else {
+		s.s.HideCursor()
 	}
 	s.s.Show()
 	return s
@@ -186,6 +188,10 @@ func (s *screen) pollText() string {
 				}
 			case tcell.KeyRune:
 				s.Write(string(ev.Rune())).Draw()
+			case tcell.KeyDelete:
+				if s.x < len(s.lines[s.y]) {
+					s.Right(1).DeleteOne().Draw()
+				}
 			case tcell.KeyBackspace:
 				if s.x > minx {
 					s.DeleteOne().Draw()

@@ -5,5 +5,5 @@ import (
 )
 
 func TestCli_Confirm(t *testing.T) {
-	Cli{}.Confirm("hello")
+	Cli().Confirm("hello")
 }
