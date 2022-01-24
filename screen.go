@@ -33,7 +33,7 @@ type screen struct {
 	s      tcell.Screen
 }
 
-func NewScreen() *screen {
+func newScreen() *screen {
 	s, err := tcell.NewScreen()
 	if err != nil {
 		log.Fatalf("%+v", err)
@@ -133,7 +133,7 @@ func (s *screen) Start() *screen {
 	return s.Left(s.x)
 }
 func (s *screen) End() *screen {
-	return s.Right(len(s.lines[s.y]) - s.y + 1)
+	return s.Right(len(s.lines[s.y]) - s.y + 2)
 }
 
 func (s *screen) ClearColor() *screen {
@@ -256,8 +256,9 @@ func (s *screen) pollVerticalSelect(count int) int {
 					s.ClearColor().Down(1).ColorLine(SelectedLineColor).Draw()
 				}
 			case tcell.KeyEnter:
-				s.Bottom().Draw()
-				return s.y - minY
+				res := s.y - minY
+				s.ClearColor().Bottom().Draw()
+				return res
 			case tcell.KeyEscape, tcell.KeyCtrlC:
 				return -1
 			}

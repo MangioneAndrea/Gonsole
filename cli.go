@@ -16,7 +16,7 @@ type cli struct {
 func Cli() *cli {
 	c := &cli{
 		interrupted: false,
-		screen:      NewScreen(),
+		screen:      newScreen(),
 	}
 	term.Init()
 	// Fixes a graphic glitch
@@ -33,7 +33,7 @@ func (c *cli) Confirm(message string, confirmed *bool) *cli {
 	if c.interrupted {
 		return c
 	}
-	c.screen.ColorLine(ActiveQuestionColor).WriteF("%s? (y / n) : \n", message).ShowCursor(true).Draw()
+	c.screen.ColorLine(ActiveQuestionColor).WriteF("%s (y / n) : \n", message).ShowCursor(true).Draw()
 	*confirmed = c.screen.pollYN()
 	if *confirmed {
 		c.screen.Write("y")

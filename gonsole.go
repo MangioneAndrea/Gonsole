@@ -56,7 +56,6 @@ func Print(a interface{}, desc interface{}, showIf ShowIf, color Color) {
 		if desc != nil {
 			fmt.Fprint(out, setColor(color)(desc), setColor(color)(": "))
 		}
-		fmt.Printf("set'%s'", setColor(color)(a))
 		fmt.Fprintln(out, setColor(color)(a))
 	}
 }
