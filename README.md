@@ -20,7 +20,11 @@ The console is fairly simple to use.
 - The second parameter is a flag to put before the message (optional)
 - The third parameter is a filter function. It allows to print the message conditionally (optional)
 
+#### Colors
+
 <div style="display: flex;justify-content: space-evenly; align-items: center;">
+
+![Colored console](examples/console/simple/simple.png)
 
 ```go
 package main
@@ -35,11 +39,13 @@ func main() {
 }
 ```
 
-![Colored console](examples/console/simple/simple.png)
-
 </div>
 
 ---
+
+#### Conditions
+
+![Conditional console](examples/console/condition/condition.png)
 
 ```go
 package main
@@ -66,8 +72,6 @@ func main() {
 }
 ```
 
-![Conditional console](examples/console/condition/condition.png)
-
 ---
 
 ### CLI
@@ -76,6 +80,8 @@ The cli is a bit advanced and can be used mostly for small scripts. Each stage h
 result is stored there
 
 <div style="display: flex; justify-content: space-evenly; align-items: center;">
+
+![Conditional console](examples/cli/full/full.gif)
 
 ```go
 package main
@@ -95,7 +101,5 @@ func main() {
 		SelectMany("What languages do you speak?", []string{"English", "German", "Italian", "French"}, &languages)
 }
 ```
-
-![Conditional console](examples/cli/full/full.gif)
 
 </div>
