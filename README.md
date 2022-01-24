@@ -20,6 +20,8 @@ The console is fairly simple to use.
 - The second parameter is a flag to put before the message (optional)
 - The third parameter is a filter function. It allows to print the message conditionally (optional)
 
+<div style="display: flex;justify-content: space-evenly; align-items: center;">
+
 ```go
 package main
 
@@ -34,6 +36,8 @@ func main() {
 ```
 
 ![Colored console](examples/console/simple/simple.png)
+
+</div>
 
 ```go
 package main
@@ -58,7 +62,6 @@ func main() {
 	gonsole.Error(err, "Error", gonsole.ShowIfNotNil)
 	gonsole.Success(string(data), "Data", ShowIfNotEmpty)
 }
-
 ```
 
 ![Conditional console](examples/console/condition/condition.png)
@@ -67,6 +70,8 @@ func main() {
 
 The cli is a bit advanced and can be used mostly for small scripts. Each stage has a pointer as last parameter. The
 result is stored there
+
+<div style="display: flex; justify-content: space-evenly; align-items: center;">
 
 ```go
 package main
@@ -89,7 +94,9 @@ func main() {
 
 ![Conditional console](examples/cli/full/full.gif)
 
-####    
+</div>
+
+####           
 
 
  
