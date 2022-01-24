@@ -300,3 +300,10 @@ func (s *screen) pollVerticalManySelect(count int, onUpdate func(bool, int)) []b
 		}
 	}
 }
+
+func (s *screen) Clear() *screen {
+	s.lines = []string{""}
+	s.x = 0
+	s.y = 0
+	return s
+}

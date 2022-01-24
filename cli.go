@@ -43,6 +43,10 @@ func (c *cli) Confirm(message string, confirmed *bool) *cli {
 	c.screen.ColorLine(QuestionColor).ShowCursor(false).Newline().Draw()
 	return c
 }
+func (c *cli) Clear() *cli {
+	c.screen.Clear()
+	return c
+}
 
 func (c *cli) Input(message string, input *string) *cli {
 	if c.interrupted {
