@@ -39,6 +39,8 @@ func main() {
 
 </div>
 
+---
+
 ```go
 package main
 
@@ -65,6 +67,8 @@ func main() {
 ```
 
 ![Conditional console](examples/console/condition/condition.png)
+
+---
 
 ### CLI
 
@@ -95,8 +99,3 @@ func main() {
 ![Conditional console](examples/cli/full/full.gif)
 
 </div>
-
-####           
-
-
- 
