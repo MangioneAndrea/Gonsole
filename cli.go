@@ -84,6 +84,13 @@ func (c *cli) SelectOne(question string, answers []string, selection *string) *c
 	return c
 }
 
+func (c *cli) KillIf(condition bool) *cli {
+	if condition {
+		c.interrupted = true
+	}
+	return c
+}
+
 func (c *cli) SelectMany(question string, answers []string, selection *[]string) *cli {
 	if c.interrupted {
 		return c
