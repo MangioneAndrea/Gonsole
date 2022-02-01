@@ -84,9 +84,30 @@ func (c *cli) SelectOne(question string, answers []string, selection *string) *c
 	return c
 }
 
+func (c *cli) Print(str string) *cli {
+	if c.interrupted {
+		return c
+	}
+	c.screen.ColorLine(QuestionColor).ShowCursor(false).Write(str).Newline().Draw()
+	return c
+}
+
 func (c *cli) KillIf(condition bool) *cli {
+	if c.interrupted {
+		return c
+	}
 	if condition {
 		c.interrupted = true
+	}
+	return c
+}
+
+func (c *cli) If(condition bool, fn func(*cli)) *cli {
+	if c.interrupted {
+		return c
+	}
+	if condition {
+		fn(c)
 	}
 	return c
 }
